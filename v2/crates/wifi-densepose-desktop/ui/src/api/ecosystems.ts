@@ -173,12 +173,33 @@ export function commissionMatter(
   });
 }
 
-export function getMappings(): Promise<ApiResult<MappingRow[]>> {
-  return request<MappingRow[]>("/mappings");
+// The backend returns a MappingTable (`{ rows: [...] }`) whose rows carry a
+// `ruview_entity` field; the UI model uses a flat `MappingRow[]` with `entity`.
+// Adapt at this boundary so the page/component never see the wire shape.
+export async function getMappings(): Promise<ApiResult<MappingRow[]>> {
+  const res = await request<{ rows: Array<Record<string, unknown>> }>("/mappings");
+  if (!res.ok) return res;
+  const rows: MappingRow[] = (res.data?.rows ?? []).map((r) => ({
+    entity: String(r.ruview_entity ?? ""),
+    ecosystem: r.ecosystem as MappingRow["ecosystem"],
+    primitive: String(r.primitive ?? ""),
+    internal_only: !Boolean(r.editable),
+  }));
+  return ok(rows);
 }
 
-export function updateMapping(row: MappingRow): Promise<ApiResult<MappingRow>> {
-  return request<MappingRow>("/mappings", { method: "PUT", body: row });
+export async function updateMapping(row: MappingRow): Promise<ApiResult<MappingRow>> {
+  const res = await request<{ ok: boolean }>("/mappings", {
+    method: "PUT",
+    body: {
+      ruview_entity: row.entity,
+      ecosystem: row.ecosystem,
+      primitive: row.primitive,
+      editable: !row.internal_only,
+    },
+  });
+  // The PUT acks `{ ok: true }`; echo the edited row back for local merge.
+  return res.ok ? ok(row) : res;
 }
 
 export interface PrivacyResult {

@@ -4,7 +4,6 @@ import { useEcosystems } from "../hooks/useEcosystems";
 import { EcosystemCard } from "../components/EcosystemCard";
 import { PingAllButton } from "../components/PingAllButton";
 import { EntityMappingTable } from "../components/EntityMappingTable";
-import { PairingQRCode } from "../components/PairingQRCode";
 import { MatterCommissioningLog } from "../components/MatterCommissioningLog";
 import { EcosystemHealthPanel } from "../components/EcosystemHealthPanel";
 import {
@@ -15,6 +14,7 @@ import {
   repairApple,
   updateMapping,
 } from "../api/ecosystems";
+import "../styles/cognitum-theme.css";
 
 /**
  * EcosystemsDashboard (ADR-172 §2.6): the ECO-FABRIC container. Owns ecosystem
@@ -72,8 +72,8 @@ export const Ecosystems: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "var(--space-5)", maxWidth: 1200 }}>
-      {/* Header */}
+    <div className="cog-theme" style={{ padding: "var(--space-5)", maxWidth: 1200 }}>
+      {/* Cognitum-branded header */}
       <div
         style={{
           display: "flex",
@@ -82,13 +82,18 @@ export const Ecosystems: React.FC = () => {
           marginBottom: "var(--space-5)",
         }}
       >
-        <div>
-          <h1 className="heading-lg" style={{ margin: 0 }}>
-            Ecosystems
-          </h1>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: "var(--space-1)" }}>
-            ECO-FABRIC — one control surface for Apple Home, Google Home, Alexa, and SmartThings
-          </p>
+        <div className="cog-brand">
+          <span className="cog-hex" aria-hidden>
+            ⬢
+          </span>
+          <div>
+            <div className="cog-wordmark">
+              Cognitum <span className="cog-accent">Seed</span>
+            </div>
+            <p style={{ fontSize: 12.5, color: "var(--text-secondary)", margin: "2px 0 0" }}>
+              ECO-FABRIC · add RuView to Apple Home, Google Home, Alexa &amp; SmartThings
+            </p>
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
           <span
@@ -172,6 +177,29 @@ export const Ecosystems: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* How pairing works — the conceptual frame: RuView is the sensor. */}
+          <div className="cog-explainer" style={{ marginBottom: "var(--space-5)" }}>
+            <h3>How pairing works</h3>
+            <p>
+              RuView is the <b>accessory</b> — it appears as a privacy-safe occupancy / motion
+              sensor inside your smart-home app. You don't connect RuView to your devices; you{" "}
+              <b>add RuView from your ecosystem's app</b>, the same way you'd add a smart plug.
+            </p>
+            <ol>
+              <li>
+                Pick an ecosystem below and open <b>How to add</b> for its setup code &amp; steps.
+              </li>
+              <li>
+                In that ecosystem's app (e.g. <b>Apple Home</b>), choose <b>Add device</b> and{" "}
+                <b>scan RuView's QR / enter the code</b>.
+              </li>
+              <li>
+                RuView's presence, occupancy &amp; semantic events then show up as sensors you can
+                use in automations — at the <b>privacy class</b> you set per ecosystem.
+              </li>
+            </ol>
+          </div>
+
           {/* 2×2 grid of ecosystem cards */}
           <div
             style={{
@@ -188,36 +216,15 @@ export const Ecosystems: React.FC = () => {
                 onPair={handlePair}
                 onRepair={handleRepair}
                 onCommission={handleCommission}
+                matterCode={matterQr?.manual_code ?? null}
+                matterQr={matterQr?.qr_payload ?? null}
               />
             ))}
           </div>
 
-          {/* Ping-all + Matter pairing artifacts */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr",
-              gap: "var(--space-4)",
-              marginBottom: "var(--space-5)",
-            }}
-          >
+          {/* Delivery test */}
+          <div style={{ marginBottom: "var(--space-5)" }}>
             <PingAllButton onPing={pingAll} />
-            <div
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                padding: "var(--space-4)",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <PairingQRCode
-                kind="matter"
-                payload={matterQr?.qr_payload ?? null}
-                manualCode={matterQr?.manual_code}
-              />
-            </div>
           </div>
 
           {/* Mapping table */}

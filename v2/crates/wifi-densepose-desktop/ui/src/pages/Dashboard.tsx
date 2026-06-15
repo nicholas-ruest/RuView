@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { StatusBadge } from "../components/StatusBadge";
 import type { HealthStatus } from "../types";
+import { isTauri, invokeIfTauri } from "../tauri";
+
+const BROWSER_PREVIEW_NOTE =
+  "Device discovery & server control run in the RuView desktop app. " +
+  "Open the Ecosystems page to manage smart-home pairing from the browser.";
 
 interface DiscoveredNode {
   ip: string;
@@ -32,11 +37,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [scanError, setScanError] = useState<string | null>(null);
 
   const handleScan = async () => {
+    if (!isTauri()) {
+      setScanError(BROWSER_PREVIEW_NOTE);
+      return;
+    }
     setScanning(true);
     setScanError(null);
     try {
-      const { invoke } = await import("@tauri-apps/api/core");
-      const found = await invoke<DiscoveredNode[]>("discover_nodes", { timeoutMs: 3000 });
+      const found = (await invokeIfTauri<DiscoveredNode[]>("discover_nodes", { timeoutMs: 3000 })) ?? [];
       setNodes(found);
       if (found.length === 0) {
         setScanError("No nodes found. Ensure ESP32 devices are powered on and connected to the network.");
@@ -50,10 +58,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   };
 
   const fetchServerStatus = async () => {
+    if (!isTauri()) return; // desktop-only; no-op in browser preview
     try {
-      const { invoke } = await import("@tauri-apps/api/core");
-      const status = await invoke<ServerStatus>("server_status");
-      setServerStatus(status);
+      const status = await invokeIfTauri<ServerStatus>("server_status");
+      if (status) setServerStatus(status);
     } catch (err) {
       console.error("Server status check failed:", err);
     }

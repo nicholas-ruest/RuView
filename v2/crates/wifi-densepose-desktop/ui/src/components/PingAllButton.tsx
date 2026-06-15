@@ -74,7 +74,7 @@ export function PingAllButton({ onPing }: PingAllButtonProps) {
             border: "none",
             cursor: inFlight ? "not-allowed" : "pointer",
             background: "var(--accent)",
-            color: "#fff",
+            color: "var(--accent-contrast, #fff)",
             opacity: inFlight ? 0.6 : 1,
           }}
         >

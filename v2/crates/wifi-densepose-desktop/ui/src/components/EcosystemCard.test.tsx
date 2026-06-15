@@ -30,18 +30,18 @@ function appleEco(overrides: Partial<EcosystemStatus> = {}): EcosystemStatus {
 }
 
 describe("EcosystemCard", () => {
-  it("shows the scaffolding banner and disables Commission when feature_available is false", () => {
+  it("shows the scaffolding banner and disables commissioning when feature_available is false", () => {
     render(<EcosystemCard ecosystem={matterEco()} onCommission={vi.fn()} />);
 
     expect(
       screen.getByText(/Matter SDK: scaffolding only — full commissioning in v0.7.1/i),
     ).toBeInTheDocument();
 
-    const commission = screen.getByRole("button", { name: /commission/i });
+    const commission = screen.getByRole("button", { name: /begin commissioning/i });
     expect(commission).toBeDisabled();
   });
 
-  it("enables Commission when the Matter SDK feature is available", () => {
+  it("enables commissioning when the Matter SDK feature is available", () => {
     render(
       <EcosystemCard
         ecosystem={matterEco({ feature_available: true })}
@@ -49,13 +49,11 @@ describe("EcosystemCard", () => {
       />,
     );
 
-    expect(
-      screen.queryByText(/scaffolding only/i),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /commission/i })).toBeEnabled();
+    expect(screen.queryByText(/scaffolding only/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /begin commissioning/i })).toBeEnabled();
   });
 
-  it("disables Apple pair/re-pair with a note when hap-server is absent", () => {
+  it("disables Apple advertising with a note when hap-server is absent", () => {
     render(
       <EcosystemCard
         ecosystem={appleEco({ feature_available: false })}
@@ -65,14 +63,19 @@ describe("EcosystemCard", () => {
     );
 
     expect(screen.getByText(/hap-server/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^pair$/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /re-pair/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /start advertising/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /re-advertise/i })).toBeDisabled();
   });
 
-  it("renders the pairing badge and enables Apple actions when hap-server is on", () => {
+  it("frames RuView as the accessory and surfaces the connection state", () => {
     render(<EcosystemCard ecosystem={appleEco()} onPair={vi.fn()} onRepair={vi.fn()} />);
 
-    expect(screen.getByText("Paired")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^pair$/i })).toBeEnabled();
+    // Connection badge (reframed from "Paired" → "Connected").
+    expect(screen.getByText("Connected")).toBeInTheDocument();
+    // The card explains the correct direction of the flow.
+    expect(screen.getByText(/Add it from the/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /start advertising/i })).toBeEnabled();
+    // The per-ecosystem "how to add" disclosure is present.
+    expect(screen.getByRole("button", { name: /how to add to apple home/i })).toBeInTheDocument();
   });
 });

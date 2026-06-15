@@ -152,7 +152,7 @@ export function EntityMappingTable({ rows, editable = true, onEdit }: EntityMapp
                             borderRadius: 4,
                             border: "none",
                             background: "var(--accent)",
-                            color: "#fff",
+                            color: "var(--accent-contrast, #fff)",
                             cursor: savingKey === key ? "not-allowed" : "pointer",
                             opacity: savingKey === key ? 0.6 : 1,
                           }}

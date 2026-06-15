@@ -50,7 +50,7 @@ function LatencySparkline({ series }: { series: EcoHealthSeries }) {
       role="img"
       aria-label={`${ECO_LABELS[series.ecosystem] ?? series.ecosystem} latency sparkline`}
     >
-      <path d={path} fill="none" stroke="var(--accent, #7c3aed)" strokeWidth="1.5" />
+      <path d={path} fill="none" stroke="var(--accent, #4ecdc4)" strokeWidth="1.5" />
     </svg>
   );
 }

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { APP_VERSION } from "./version";
+import { isTauri } from "./tauri";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import { Nodes } from "./pages/Nodes";
 import NetworkDiscovery from "./pages/NetworkDiscovery";
@@ -50,7 +52,12 @@ interface LiveStatus {
 }
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<Page>("dashboard");
+  // Desktop shell opens on the Dashboard; a plain browser (dev preview /
+  // Codespaces) opens on Ecosystems — the web-capable, fetch-based surface —
+  // since the Tauri-driven pages can't reach hardware without the IPC bridge.
+  const [activePage, setActivePage] = useState<Page>(() =>
+    isTauri() ? "dashboard" : "ecosystems",
+  );
   const [hoveredNav, setHoveredNav] = useState<Page | null>(null);
   const [pageKey, setPageKey] = useState(0);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>({
@@ -135,20 +142,18 @@ const App: React.FC = () => {
                   width: 30,
                   height: 30,
                   borderRadius: 8,
-                  background: "linear-gradient(135deg, var(--accent), #a855f7, #ec4899)",
-                  backgroundSize: "200% 200%",
-                  animation: "gradient-shift 4s ease infinite",
+                  background: "linear-gradient(135deg, var(--accent), #60a5fa)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: "#fff",
+                  fontSize: 18,
+                  lineHeight: 1,
+                  color: "#0a0e1a",
                   fontFamily: "var(--font-sans)",
-                  boxShadow: "0 2px 12px rgba(124, 58, 237, 0.4)",
+                  boxShadow: "0 2px 12px rgba(78, 205, 196, 0.45)",
                 }}
               >
-                R
+                ⬢
               </div>
               <div>
                 <h1
@@ -162,17 +167,18 @@ const App: React.FC = () => {
                     lineHeight: 1.2,
                   }}
                 >
-                  RuView
+                  Cognitum
                 </h1>
                 <span
                   style={{
                     fontSize: 10,
-                    color: "var(--text-muted)",
+                    color: "var(--accent)",
                     fontFamily: "var(--font-mono)",
-                    letterSpacing: "0.02em",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
                   }}
                 >
-                  v{APP_VERSION}
+                  Smart Home
                 </span>
               </div>
             </div>
@@ -196,7 +202,7 @@ const App: React.FC = () => {
                     width: "100%",
                     padding: "8px 16px",
                     background: isActive
-                      ? "linear-gradient(90deg, rgba(124, 58, 237, 0.15), transparent)"
+                      ? "linear-gradient(90deg, rgba(78, 205, 196, 0.15), transparent)"
                       : isHovered
                         ? "var(--bg-hover)"
                         : "transparent",
@@ -223,8 +229,8 @@ const App: React.FC = () => {
                         bottom: 4,
                         width: 3,
                         borderRadius: "0 3px 3px 0",
-                        background: "linear-gradient(180deg, var(--accent), #a855f7)",
-                        boxShadow: "0 0 8px rgba(124, 58, 237, 0.5)",
+                        background: "linear-gradient(180deg, var(--accent), #60a5fa)",
+                        boxShadow: "0 0 8px rgba(78, 205, 196, 0.5)",
                       }}
                     />
                   )}
@@ -234,7 +240,7 @@ const App: React.FC = () => {
                       height: 24,
                       borderRadius: 6,
                       background: isActive
-                        ? "linear-gradient(135deg, var(--accent), #a855f7)"
+                        ? "linear-gradient(135deg, var(--accent), #60a5fa)"
                         : isHovered
                           ? "var(--bg-active)"
                           : "var(--bg-elevated)",
@@ -245,7 +251,7 @@ const App: React.FC = () => {
                       color: isActive ? "#fff" : "var(--text-muted)",
                       transition: "all 0.15s ease",
                       flexShrink: 0,
-                      boxShadow: isActive ? "0 2px 8px rgba(124, 58, 237, 0.3)" : "none",
+                      boxShadow: isActive ? "0 2px 8px rgba(78, 205, 196, 0.3)" : "none",
                       transform: isHovered ? "scale(1.1)" : "scale(1)",
                     }}
                   >
@@ -289,7 +295,7 @@ const App: React.FC = () => {
           }}
         >
           <div key={pageKey} className="page-transition">
-            {renderPage()}
+            <ErrorBoundary>{renderPage()}</ErrorBoundary>
           </div>
         </main>
       </div>

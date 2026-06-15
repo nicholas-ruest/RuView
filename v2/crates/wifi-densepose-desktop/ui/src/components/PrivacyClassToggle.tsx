@@ -71,7 +71,7 @@ export function PrivacyClassToggle({ ecosystem, value, onChange }: PrivacyClassT
                 border: "none",
                 cursor: pending != null ? "not-allowed" : "pointer",
                 background: active ? "var(--accent)" : "transparent",
-                color: active ? "#fff" : "var(--text-secondary)",
+                color: active ? "var(--accent-contrast, #fff)" : "var(--text-secondary)",
                 opacity: busy ? 0.6 : 1,
                 transition: "background 0.15s, color 0.15s",
               }}

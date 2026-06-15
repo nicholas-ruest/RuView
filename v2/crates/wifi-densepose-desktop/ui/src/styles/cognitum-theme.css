@@ -1,0 +1,143 @@
+/*
+ * Cognitum Seed theme for the ECO-FABRIC surface (ADR-172).
+ *
+ * Scoped to `.cog-theme` so it reskins the Ecosystems page WITHOUT touching
+ * the rest of the desktop app. It overrides the design-system token NAMES the
+ * ecosystem components already reference (`--bg-surface`, `--accent`,
+ * `--text-primary`, fonts, …), so the cascade restyles every child component
+ * with zero per-component edits.
+ *
+ * Values are lifted verbatim from https://seed.cognitum.one/store:
+ *   --bg #0a0e1a · --card #171d30 · --card-h #1e2540 · --border #252d45
+ *   --t1 #e0e4f0 · --t2 #8890a8 · --t3 #505872 · accent cyan #4ecdc4
+ *   fonts: Segoe UI (sans) / Cascadia Code (mono) · radius 10px
+ */
+
+.cog-theme {
+  /* surfaces */
+  --bg-base: #0a0e1a;
+  --bg-surface: #171d30;
+  --bg-elevated: #1e2540;
+  --border: #252d45;
+
+  /* text */
+  --text-primary: #e0e4f0;
+  --text-secondary: #8890a8;
+  --text-muted: #505872;
+
+  /* brand accent — cyan, dark text on top */
+  --accent: #4ecdc4;
+  --accent-hover: #5fd9d1;
+  --accent-contrast: #0a0e1a;
+  --accent-dim: rgba(78, 205, 196, 0.15);
+
+  /* status — Cognitum palette */
+  --status-online: #6bcb77;
+  --status-warning: #d4a574;
+  --status-error: #e06060;
+  --status-info: #60a5fa;
+
+  /* type */
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Code", "Fira Code", Consolas, monospace;
+
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100%;
+}
+
+/* ── Brand header ─────────────────────────────────────────────────── */
+.cog-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cog-hex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px rgba(78, 205, 196, 0.45));
+}
+.cog-wordmark {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.cog-wordmark .cog-accent {
+  color: var(--accent);
+}
+
+/* ── "How pairing works" explainer ───────────────────────────────── */
+.cog-explainer {
+  background: linear-gradient(135deg, var(--bg-surface), var(--bg-base));
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.cog-explainer h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.cog-explainer p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.cog-explainer ol {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+.cog-explainer li {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.cog-explainer b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ── Per-card setup step list ────────────────────────────────────── */
+.cog-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+}
+.cog-steps li {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.cog-steps b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* category-style pill, like the store's badges */
+.cog-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
