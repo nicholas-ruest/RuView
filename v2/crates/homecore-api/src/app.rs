@@ -1,11 +1,12 @@
 //! Axum router wiring. Mounts the §2.1 P2 routes + the WS endpoint.
 
 use axum::http::{header, HeaderValue, Method};
-use axum::routing::{get, post};
+use axum::routing::{get, post, put};
 use axum::Router;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::trace::TraceLayer;
 
+use crate::ecosystems;
 use crate::rest;
 use crate::state::SharedState;
 use crate::ws;
@@ -37,6 +38,22 @@ pub fn router(state: SharedState) -> Router {
         .route("/api/services", get(rest::get_services))
         .route("/api/services/:domain/:service", post(rest::call_service))
         .route("/api/websocket", get(ws::websocket_handler))
+        // ── ADR-172 ECO-FABRIC — /api/v1/ecosystems/ (BearerAuth-gated) ──
+        .route("/api/v1/ecosystems/status", get(ecosystems::status))
+        .route("/api/v1/ecosystems/matter/qr", get(ecosystems::matter_qr))
+        .route("/api/v1/ecosystems/apple/pair", post(ecosystems::apple_pair))
+        .route("/api/v1/ecosystems/apple/repair", post(ecosystems::apple_repair))
+        .route(
+            "/api/v1/ecosystems/matter/commission",
+            post(ecosystems::matter_commission),
+        )
+        .route(
+            "/api/v1/ecosystems/mappings",
+            get(ecosystems::get_mappings).put(ecosystems::put_mapping),
+        )
+        .route("/api/v1/ecosystems/:eco/privacy", put(ecosystems::set_privacy))
+        .route("/api/v1/ecosystems/ping-all", post(ecosystems::ping_all))
+        .route("/api/v1/ecosystems/health", get(ecosystems::health))
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state)

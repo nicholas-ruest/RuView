@@ -229,3 +229,98 @@ export interface AppSettings {
   discover_interval_ms: number;
   theme: "dark" | "light";
 }
+
+// ---------------------------------------------------------------------------
+// Smart Home Ecosystems — ECO-FABRIC (ADR-172)
+// ---------------------------------------------------------------------------
+
+/** The four supported consumer ecosystems. Matches `id` in GET /status. */
+export type EcosystemId =
+  | "apple_home"
+  | "google_home"
+  | "amazon_alexa"
+  | "smartthings";
+
+/** Per-ecosystem pairing state (ADR-172 §2.3). */
+export type PairingState = "paired" | "unpaired" | "error";
+
+/** Per-ecosystem health indicator (ADR-172 §2.3). */
+export type EcoHealth = "ok" | "degraded" | "down";
+
+/**
+ * Effective privacy class for a networked ecosystem (ADR-172 §2.5).
+ * Only class 2 ("Anonymous") and class 3 ("Restricted") are permitted at the
+ * four-ecosystem boundary; the API rejects anything below 2 with 422.
+ */
+export type PrivacyClass = 2 | 3;
+
+/** One ecosystem's status row from GET /api/v1/ecosystems/status. */
+export interface EcosystemStatus {
+  id: EcosystemId;
+  protocol: string; // "hap-1.1" | "matter-1.4"
+  pairing: PairingState;
+  health: EcoHealth;
+  /** Is the live path's feature flag (hap-server / Matter SDK) compiled in? */
+  feature_available: boolean;
+  privacy_class: PrivacyClass;
+  /** Ecosystem-specific identifiers (mdns_advertised, fabric_id, device_id, ...). */
+  details: Record<string, unknown>;
+}
+
+/** Snapshot of all four ecosystems. */
+export interface EcosystemsStatus {
+  ecosystems: EcosystemStatus[];
+}
+
+/** GET /api/v1/ecosystems/matter/qr response. */
+export interface MatterQr {
+  /** "MT:"-prefixed payload, or null until QR generation lands (v0.7.1). */
+  qr_payload: string | null;
+  /** Real today — 11-digit manual code from commissioning.rs. */
+  manual_code: string;
+  discriminator: number;
+  vendor_id: number;
+  product_id: number;
+}
+
+/** One row of the entity → primitive mapping table (per ecosystem). */
+export interface MappingRow {
+  /** RuView source entity, e.g. "presence", "identity_risk_score". */
+  entity: string;
+  /** Target ecosystem this mapping applies to. */
+  ecosystem: EcosystemId;
+  /** Target primitive, e.g. "MotionSensor → MotionDetected". */
+  primitive: string;
+  /** Internal-only rows (identity_risk_score) are read-only / greyed. */
+  internal_only: boolean;
+}
+
+/** One result row from POST /ping-all. */
+export interface PingResult {
+  ecosystem: EcosystemId;
+  delivered: boolean;
+  latency_ms?: number;
+  reason?: string;
+}
+
+// P4 — longitudinal ecosystem health (ADR-172).
+export interface HealthSample {
+  t_ms: number;
+  delivered: boolean;
+  latency_ms?: number;
+}
+
+export interface EcoHealthSeries {
+  ecosystem: EcosystemId;
+  samples: HealthSample[];
+  delivered: number;
+  total: number;
+  error_rate: number;
+  avg_latency_ms?: number;
+  recommission_alerts: number;
+}
+
+export interface HealthReport {
+  window_hours: number;
+  ecosystems: EcoHealthSeries[];
+}

@@ -28,6 +28,8 @@ homecore-hap       = { path = "../homecore-hap",       version = "0.1.0-alpha.0"
 homecore-recorder  = { path = "../homecore-recorder",  version = "0.1.0-alpha.0" }
 homecore-automation = { path = "../homecore-automation", version = "0.1.0-alpha.0" }
 homecore-assist    = { path = "../homecore-assist",    version = "0.1.0-alpha.0" }
+# ADR-172 ECO-FABRIC — ecosystems manager (Apple HAP + 3 Matter fabrics).
+homecore-ecosystems = { path = "../homecore-ecosystems" }
 # Migration crate is CLI-only; not linked here.
 
 tokio = { version = "1", features = ["full"] }
@@ -37,6 +39,8 @@ clap = { version = "4", features = ["derive", "env"] }
 anyhow = "1"
 serde_json = "1"
 axum = { version = "0.7", features = ["macros"] }
+# ADR-172 §2.2 — static-serve the built ECO-FABRIC UI bundle at /ecosystems.
+tower-http = { version = "0.6", features = ["fs"] }
 
 [features]
 default = []
@@ -44,3 +48,6 @@ default = []
 ruvector = ["homecore-recorder/ruvector"]
 # Pull in real Wasmtime plugin runtime (vs InProcessRuntime).
 wasmtime = ["homecore-plugins/wasmtime"]
+# ADR-172 §2.1 — forward the live-path gates to the ecosystems crate.
+apple-live = ["homecore-api/apple-live", "homecore-ecosystems/apple-live"]
+matter-live = ["homecore-api/matter-live", "homecore-ecosystems/matter-live"]

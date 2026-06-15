@@ -23,9 +23,11 @@
 //!         http://127.0.0.1:8123/api/
 
 use std::net::SocketAddr;
+use std::path::PathBuf;
 
 use homecore::HomeCore;
 use homecore_api::{router, LongLivedTokenStore, SharedState, DEFAULT_PORT};
+use homecore_ecosystems::EcosystemsManager;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,7 +58,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         LongLivedTokenStore::allow_any_non_empty()
     };
 
-    let state = SharedState::with_tokens(homecore, "Home", env!("CARGO_PKG_VERSION"), tokens);
+    // ADR-172 ECO-FABRIC — back the ecosystems manager with the real Seed
+    // config (RUVIEW_SEED_CONFIG), so per-ecosystem privacy overrides and
+    // mapping edits persist across restarts.
+    let seed_cfg = match std::env::var("RUVIEW_SEED_CONFIG") {
+        Ok(v) if !v.trim().is_empty() => PathBuf::from(v),
+        _ => PathBuf::from("/var/lib/ruview/seed.toml"),
+    };
+    tracing::info!("ECO-FABRIC ecosystems manager using Seed config at {}", seed_cfg.display());
+    let ecosystems = EcosystemsManager::new(seed_cfg);
+
+    let state = SharedState::with_full(
+        homecore,
+        "Home",
+        env!("CARGO_PKG_VERSION"),
+        tokens,
+        ecosystems,
+    );
     let app = router(state);
 
     // Default to loopback so `cargo run` is not network-exposed; allow

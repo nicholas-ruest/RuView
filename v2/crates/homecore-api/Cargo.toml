@@ -11,12 +11,22 @@ repository = "https://github.com/ruvnet/RuView"
 name = "homecore_api"
 path = "src/lib.rs"
 
+[features]
+default = []
+# ADR-172 §2.1 degradation contract — forward to the ecosystems crate's
+# live-path gates. OFF by default: Apple pairing / Matter commissioning
+# return the documented 409s until the HAP server / rs-matter SDK land.
+apple-live = ["homecore-ecosystems/apple-live"]
+matter-live = ["homecore-ecosystems/matter-live"]
+
 [[bin]]
 name = "homecore-api-server"
 path = "src/bin/server.rs"
 
 [dependencies]
 homecore = { path = "../homecore", version = "0.1.0-alpha.0" }
+# ADR-172 ECO-FABRIC — pure-domain ecosystems manager (no axum dep; we wire it).
+homecore-ecosystems = { path = "../homecore-ecosystems" }
 
 axum = { version = "0.7", features = ["ws", "json", "macros"] }
 tokio = { version = "1", features = ["full"] }

@@ -3476,6 +3476,7 @@ dependencies = [
  "dashmap",
  "futures-util",
  "homecore",
+ "homecore-ecosystems",
  "http-body-util",
  "hyper 1.8.1",
  "serde",
@@ -3518,6 +3519,20 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "uuid",
+]
+
+[[package]]
+name = "homecore-ecosystems"
+version = "0.1.0-alpha.0"
+dependencies = [
+ "criterion",
+ "homecore-hap",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "toml 0.8.23",
+ "tracing",
+ "wifi-densepose-sensing-server",
 ]
 
 [[package]]
@@ -3599,11 +3614,13 @@ dependencies = [
  "homecore-api",
  "homecore-assist",
  "homecore-automation",
+ "homecore-ecosystems",
  "homecore-hap",
  "homecore-plugins",
  "homecore-recorder",
  "serde_json",
  "tokio",
+ "tower-http",
  "tracing",
  "tracing-subscriber",
 ]
