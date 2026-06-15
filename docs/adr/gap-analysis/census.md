@@ -166,3 +166,4 @@ Full per-ADR census underpinning ADR-164. **162 ADR entries across 156 distinct 
 | ADR-161 | HOMECORE Server — WS Auth Bypass, Reply-Theater | accepted | implemented | CRITICAL WS auth bypass fix; amends 130/129/128 |
 | ADR-162 | HOMECORE Plugin Security + Bounded RunModes | accepted | implemented | security-critical; enforces ADR-161 deferrals |
 | ADR-163 | Edge-Latency Measurement — CLAIMED→MEASURED | accepted | implemented | ESP32/Xtensa figure remains UNMEASURED (hardware-gated) |
+| ADR-172 | ECO-FABRIC — Smart-Home Ecosystem UI (Apple/Google/Alexa/SmartThings) | Proposed | implemented | new `homecore-ecosystems` crate + `/api/v1/ecosystems/` (BearerAuth-gated) + desktop UI page; P1/P2/P4 live (P4 = `/health` latency series + recommission alerts), P3 live-pairing gated behind `apple-live`/`matter-live` (HAP server + rs-matter SDK v0.7.1), degradation contract enforced+tested; 30 crate + 14 API + 15 UI tests, 0 failed |

@@ -1,0 +1,55 @@
+# homecore-ecosystems — ECO-FABRIC backend domain (ADR-172)
+#
+# Pure domain logic + an `EcosystemsManager` that powers the
+# `/api/v1/ecosystems/` HOMECORE-API namespace. This crate deliberately
+# does NOT depend on axum or homecore-api: homecore-api depends on IT.
+# It REUSES the SDK-independent Matter manual-code generator from
+# `wifi-densepose-sensing-server::matter` and the `hap-server` feature
+# gate from `homecore-hap` to model ADR-172's degradation contract.
+
+[package]
+name = "homecore-ecosystems"
+version = "0.1.0-alpha.0"
+edition = "2021"
+license = "MIT"
+authors = ["rUv <ruv@ruv.net>", "HOMECORE Contributors"]
+description = "ECO-FABRIC smart-home ecosystem domain — ADR-172 backend foundation"
+repository = "https://github.com/ruvnet/wifi-densepose"
+
+[lib]
+name = "homecore_ecosystems"
+path = "src/lib.rs"
+
+[features]
+default = []
+# Live HAP advertisement path. When OFF, pair/repair return 409
+# `hap_server_disabled` per ADR-172 §2.1.a. Forwards to homecore-hap's
+# own `hap-server` gate so the two move together.
+apple-live = ["homecore-hap/hap-server"]
+# Live Matter commissioning path. When OFF, commission returns 409
+# `matter_sdk_unavailable` per ADR-172 §2.1.b (rs-matter SDK gated to
+# v0.7.1). No deps yet — the SDK is added when this gate is wired.
+matter-live = []
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+thiserror = "2"
+tracing = "0.1"
+
+# Reuse the SDK-independent Matter manual pairing-code generator
+# (commissioning.rs) + cluster mapping table. default-features = false
+# keeps the mqtt/matter optional feature surface off.
+wifi-densepose-sensing-server = { path = "../wifi-densepose-sensing-server", default-features = false }
+
+# Path-dep for the `hap-server` feature gate (forwarded by `apple-live`)
+# and the canonical Apple-Home crate location per ADR-172 §1.2.
+homecore-hap = { path = "../homecore-hap" }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "ecosystems"
+harness = false

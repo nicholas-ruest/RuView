@@ -19,6 +19,7 @@
 //!     cargo run -p homecore-server --features ruvector,wasmtime -- ...
 
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -28,6 +29,7 @@ use tracing::{info, warn};
 use homecore::{Context, EntityId, HomeCore, ServiceCall, ServiceError, ServiceName};
 use homecore::service::FnHandler;
 use homecore_api::{router, LongLivedTokenStore, SharedState};
+use homecore_ecosystems::EcosystemsManager;
 use homecore_assist::pipeline::default_pipeline;
 use homecore_assist::RegexIntentRecognizer;
 use homecore_automation::AutomationEngine;
@@ -59,6 +61,17 @@ struct Cli {
     /// integrations that will populate the state machine themselves.
     #[arg(long)]
     no_seed_entities: bool,
+
+    /// ADR-172 ECO-FABRIC Seed config path (per-ecosystem privacy
+    /// overrides + mapping edits). Missing file = defaults (global
+    /// class 2, no overrides).
+    #[arg(long, env = "RUVIEW_SEED_CONFIG", default_value = "/var/lib/ruview/seed.toml")]
+    seed_config: PathBuf,
+
+    /// ADR-172 §2.2 — directory of the built ECO-FABRIC UI bundle. When
+    /// set, it is served as a static route at `/ecosystems`.
+    #[arg(long, env = "HOMECORE_UI_DIR")]
+    ui_dir: Option<PathBuf>,
 }
 
 #[tokio::main]
@@ -168,13 +181,34 @@ async fn main() -> Result<()> {
         warn!("HOMECORE_TOKENS not set — token store in DEV mode (any non-empty bearer accepted). Provision real tokens before exposing to the network.");
         LongLivedTokenStore::allow_any_non_empty()
     };
-    let api_state = SharedState::with_tokens(
+    // ── 7b. ECO-FABRIC ecosystems manager (ADR-172) ─────────────────
+    let ecosystems = EcosystemsManager::new(cli.seed_config.clone());
+    info!(
+        "ECO-FABRIC ecosystems manager ready (Seed config {}; Apple+3 Matter fabrics)",
+        cli.seed_config.display()
+    );
+
+    let api_state = SharedState::with_full(
         hc.clone(),
         cli.location_name,
         env!("CARGO_PKG_VERSION"),
         tokens,
+        ecosystems,
     );
-    let app = router(api_state);
+    let mut app = router(api_state);
+
+    // ADR-172 §2.2 — serve the built ECO-FABRIC UI bundle at /ecosystems
+    // when HOMECORE_UI_DIR / --ui-dir points at it. Optional: when unset
+    // the desktop Tauri shell is the only front-end.
+    if let Some(dir) = cli.ui_dir.as_ref() {
+        if dir.is_dir() {
+            app = app.nest_service("/ecosystems", tower_http::services::ServeDir::new(dir));
+            info!("ECO-FABRIC UI served at /ecosystems from {}", dir.display());
+        } else {
+            warn!("HOMECORE_UI_DIR={} is not a directory — /ecosystems static route skipped", dir.display());
+        }
+    }
+
     let listener = tokio::net::TcpListener::bind(cli.bind).await?;
     info!("HOMECORE-API listening on http://{} (HA-compat /api + /api/websocket)", cli.bind);
 

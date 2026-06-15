@@ -1,6 +1,7 @@
 //! HOMECORE-API — wire-compat Axum REST + WebSocket port of HA's API (ADR-130).
 pub mod app;
 pub mod auth;
+pub mod ecosystems;
 pub mod error;
 pub mod rest;
 pub mod state;

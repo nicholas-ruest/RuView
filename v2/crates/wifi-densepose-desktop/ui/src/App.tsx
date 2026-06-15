@@ -9,6 +9,7 @@ import { EdgeModules } from "./pages/EdgeModules";
 import { Sensing } from "./pages/Sensing";
 import { MeshView } from "./pages/MeshView";
 import { Settings } from "./pages/Settings";
+import { Ecosystems } from "./pages/Ecosystems";
 
 type Page =
   | "dashboard"
@@ -19,6 +20,7 @@ type Page =
   | "wasm"
   | "sensing"
   | "mesh"
+  | "ecosystems"
   | "settings";
 
 interface NavItem {
@@ -36,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "wasm", label: "Edge Modules", icon: "\u2B21" },
   { id: "sensing", label: "Sensing", icon: "\u2248" },
   { id: "mesh", label: "Mesh View", icon: "\u2B2F" },
+  { id: "ecosystems", label: "Ecosystems", icon: "\u2302" },
   { id: "settings", label: "Settings", icon: "\u2699" },
 ];
 
@@ -99,6 +102,7 @@ const App: React.FC = () => {
       case "wasm": return <EdgeModules />;
       case "sensing": return <Sensing />;
       case "mesh": return <MeshView />;
+      case "ecosystems": return <Ecosystems />;
       case "settings": return <Settings />;
     }
   };
